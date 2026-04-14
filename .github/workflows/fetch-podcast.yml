@@ -2,12 +2,12 @@ name: Fetch Podcast XML
 
 on:
   schedule:
-    # 台灣時間 週三、週六 16:00–20:00 每小時
-    # (UTC 08:00–12:00)
     - cron: "0 8-12 * * 3,6"
 
-  # 允許手動測試
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   fetch:
