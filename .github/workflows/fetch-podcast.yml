@@ -1,0 +1,42 @@
+name: Fetch Podcast XML
+
+on:
+  schedule:
+    # 台灣時間 週三、週六 16:00–20:00 每小時
+    # (UTC 08:00–12:00)
+    - cron: "0 8-12 * * 3,6"
+
+  # 允許手動測試
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download XML
+        run: |
+          curl -L \
+            --retry 3 \
+            --max-time 30 \
+            -H "User-Agent: github-actions-fetcher" \
+            https://feeds.soundon.fm/podcasts/954689a5-3096-43a4-a80b-7810b219cef3.xml \
+            -o new.xml
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          if [ -f podcast.xml ] && cmp -s new.xml podcast.xml; then
+            echo "No change"
+            rm new.xml
+          else
+            mv new.xml podcast.xml
+            git add podcast.xml
+            git commit -m "Update podcast.xml"
+            git push
+          fi
